@@ -1,24 +1,40 @@
+// script.js
+const answers = {
+  q1: "A",
+  // q2: ..., thêm các đáp án đúng
+};
 
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-  <meta charset="UTF-8">
-  <title>Trắc nghiệm Vật lý</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <h1>Bài trắc nghiệm Tính chất vật lý kim loại</h1>
-  <form id="quizForm">
-    <div class="question">
-      <p>1. Kim loại dẫn điện tốt vì?</p>
-      <label><input type="radio" name="q1" value="A"> Có nhiều electron tự do</label><br>
-      <label><input type="radio" name="q1" value="B"> Có cấu trúc mạng tinh thể</label><br>
-    </div>
-    <button type="submit">Nộp bài</button>
-  </form>
+const feedback = {
+  q1: {
+    A: "Chính xác! Kim loại có nhiều electron tự do nên dẫn điện tốt.",
+    B: "Sai. Cấu trúc mạng không phải là lý do chính giúp kim loại dẫn điện."
+  }
+};
 
-  <div id="result"></div>
+document.getElementById("quizForm").addEventListener("submit", function(e) {
+  e.preventDefault();
+  let score = 0;
+  let resultHTML = "<h2>Kết quả:</h2>";
 
-  <script src="script.js"></script>
-</body>
-</html>
+  for (let key in answers) {
+    const selected = document.querySelector(`input[name="${key}"]:checked`);
+    if (selected) {
+      const isCorrect = selected.value === answers[key];
+      if (isCorrect) score++;
+      resultHTML += `<p><strong>Câu ${key.slice(1)}</strong>: ${feedback[key][selected.value]}</p>`;
+    } else {
+      resultHTML += `<p><strong>Câu ${key.slice(1)}</strong>: Bạn chưa chọn đáp án.</p>`;
+    }
+  }
+
+  resultHTML += `<p><strong>Điểm:</strong> ${score}/${Object.keys(answers).length}</p>`;
+  document.getElementById("result").innerHTML = resultHTML;
+
+  // Gửi dữ liệu lên Google Sheets
+  const formData = new FormData();
+  formData.append("score", score);
+  fetch("https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec", {
+    method: "POST",
+    body: formData,
+  });
+});
